@@ -1,0 +1,449 @@
+HUONG DAN TAI TAO THUC NGHIEM
+MINI PROJECT E-ELAN CLASSIFICATION VA OBJECT DETECTION
+======================================================================
+
+1. THONG TIN CHUNG
+----------------------------------------------------------------------
+Muc tieu cua project:
+
+- Phan tich va su dung khoi E-ELAN cho bai toan phan loai anh.
+- Su dung E-ELAN lam Backbone cho bai toan Object Detection.
+- Ket hop Backbone voi FPN Neck va Detection Head mot-scale tu xay dung.
+- Thuc hien train, save/load weights, inference va danh gia ket qua.
+
+Mo hinh detection trong project la mo hinh YOLO-style toi gian, khong phai
+ban cai day du cua YOLOv7. YOLOv7 duoc dung lam tai lieu tham khao cho
+kien truc E-ELAN.
+
+Class mapping thong nhat:
+
+    0 = cat
+    1 = dog
+    2 = panda
+
+He dieu hanh da kiem thu: Windows.
+Thu muc project mac dinh:
+
+    D:\SPCV\miniproject
+
+Neu copy project sang may khac, can thay doi PROJECT_ROOT va DATA_ROOT
+trong cac notebook cho phu hop voi duong dan moi.
+
+
+2. YEU CAU MOI TRUONG
+----------------------------------------------------------------------
+Phien ban da kiem thu:
+
+    Python       3.13.14
+    PyTorch      2.12.0
+    torchvision  0.27.0
+    Pillow       12.1.1
+    matplotlib   3.10.8
+    numpy        2.3.3
+
+Cac package toi thieu:
+
+    torch
+    torchvision
+    pillow
+    matplotlib
+    numpy
+
+Co the kiem tra Python:
+
+    python --version
+
+Neu dung VS Code:
+
+1. Mo thu muc D:\SPCV\miniproject.
+2. Mo notebook bang VS Code.
+3. Chon kernel Python 3.13.
+4. Chay cac cell tu tren xuong duoi.
+
+Khong chay cac cell khong theo thu tu, vi cac cell sau su dung bien va
+ham duoc tao o cac cell truoc.
+
+
+3. CAU TRUC THU MUC QUAN TRONG
+----------------------------------------------------------------------
+
+    D:\SPCV\miniproject\
+    |
+    +-- Advanced_CV.pdf
+    |       Tai lieu ly thuyet ve Computer Vision/E-ELAN.
+    |
+    +-- PROJECT_PLAN.md
+    |       Ke hoach va pham vi mini project.
+    |
+    +-- CNN_ELAN_Class_split.ipynb
+    |       Notebook classification chinh.
+    |
+    +-- classification\
+    |   +-- outputs\
+    |       +-- cls_eelan_improved\
+    |           +-- best.pt
+    |           +-- history.json
+    |           +-- history.csv
+    |           +-- test_metrics.csv
+    |           +-- test_predictions.csv
+    |           +-- confusion_matrix.csv
+    |           +-- plots\
+    |               +-- accuracy_curve.png
+    |               +-- loss_curve.png
+    |
+    +-- detection\
+    |   +-- EELAN_Detection.ipynb
+    |   +-- dataset.py
+    |   +-- model.py
+    |   +-- train_detection.py
+    |   +-- __init__.py
+    |   +-- README.md
+    |   +-- outputs\
+    |       +-- best_detection.pt
+    |       +-- history.json
+    |
+    +-- datasets\
+        +-- classification\
+        +-- detection_merged\
+        +-- cat\
+        +-- dog\
+        +-- panda\
+
+Khong can giu thu muc __pycache__. Day la cache tu dong cua Python va co
+the xuat hien lai sau khi chay notebook.
+
+
+4. DU LIEU CLASSIFICATION
+----------------------------------------------------------------------
+Dataset classification duoc dat tai:
+
+    D:\SPCV\miniproject\datasets\classification
+
+Cau truc bat buoc:
+
+    datasets\classification\
+    +-- train\
+    |   +-- cat\
+    |   +-- dog\
+    |   +-- panda\
+    +-- valid\
+    |   +-- cat\
+    |   +-- dog\
+    |   +-- panda\
+    +-- test\
+        +-- cat\
+        +-- dog\
+        +-- panda\
+
+Day la dataset crop tu cac bounding box va da gom cac giong dog ve class
+dog. Notebook classification su dung ImageFolder, vi vay ten thu muc cat,
+dog va panda la nhan lop.
+
+Cau hinh trong CNN_ELAN_Class_split.ipynb:
+
+    data_root = D:/SPCV/miniproject/datasets/classification
+    train_dir = train
+    val_dir   = valid
+    test_dir  = test
+
+Thong ke dataset classification da su dung:
+
+    Split   cat   dog   panda
+    train   817   867   867
+    valid   235   225   235
+    test    116   387   116
+
+
+5. CHAY CLASSIFICATION
+----------------------------------------------------------------------
+Mo file:
+
+    D:\SPCV\miniproject\CNN_ELAN_Class_split.ipynb
+
+Chay cac cell theo thu tu:
+
+1. Cell cau hinh va import.
+2. Cell kiem tra dataset.
+3. Cell tao ImageFolder/DataLoader.
+4. Cell khoi tao EELAN classifier.
+5. Cell train.
+6. Cell ve loss/accuracy.
+7. Cell load best checkpoint va danh gia test.
+8. Cell inference anh don hoac thu muc.
+
+Weights classification da train:
+
+    D:\SPCV\miniproject\classification\outputs\cls_eelan_improved\best.pt
+
+Ket qua da ghi nhan:
+
+    Test accuracy xap xi 91.12%
+
+Ket qua theo class:
+
+    Class   Precision   Recall    F1
+    cat       77.78%    96.55%  86.15%
+    dog       97.18%    89.15%  92.99%
+    panda     89.17%    92.24%  90.68%
+
+File ket qua:
+
+    test_metrics.csv       Metrics tong hop va theo class.
+    test_predictions.csv   Du doan tren tap test.
+    confusion_matrix.csv   Ma tran nham lan.
+    history.json/csv       Lich su train.
+    plots\                  Bieu do loss va accuracy.
+
+
+6. DU LIEU OBJECT DETECTION
+----------------------------------------------------------------------
+Dataset detection da chuan hoa tai:
+
+    D:\SPCV\miniproject\datasets\detection_merged
+
+File cau hinh:
+
+    D:\SPCV\miniproject\datasets\detection_merged\data.yaml
+
+Noi dung logic:
+
+    train: train/images
+    val:   valid/images
+    test:  test/images
+    nc:    3
+    names: [cat, dog, panda]
+
+Cau truc bat buoc:
+
+    detection_merged\
+    +-- train\
+    |   +-- images\
+    |   +-- labels\
+    +-- valid\
+    |   +-- images\
+    |   +-- labels\
+    +-- test\
+        +-- images\
+        +-- labels\
+
+Moi anh co mot file label cung ten trong thu muc labels. Moi dong label
+co dang YOLO:
+
+    class_id x_center y_center width height
+
+Nam gia tri toa do duoc normalize trong khoang [0, 1].
+
+Thong ke dataset:
+
+    Split   Images   Labels   Boxes
+    train    3108     3108    3921
+    valid     583      583     703
+    test      500      500     629
+
+Tong cong:
+
+    4191 images
+    4191 labels
+    5253 bounding boxes
+
+
+7. CHAY OBJECT DETECTION
+----------------------------------------------------------------------
+Mo file:
+
+    D:\SPCV\miniproject\detection\EELAN_Detection.ipynb
+
+Chay cac cell theo thu tu:
+
+1. Cau hinh PROJECT_ROOT, DATA_ROOT, OUTPUT_ROOT va import.
+2. Load va kiem tra train/valid/test dataset.
+3. Kiem tra forward pass va loss.
+4. Chay overfit tren 10 anh.
+5. Chay full training.
+6. Dinh nghia decoder, IoU, NMS va evaluator.
+7. Load checkpoint tot nhat va tinh metrics.
+8. Chay threshold sweep.
+9. Ve loss curve va bounding box inference.
+
+Cac module duoc notebook import:
+
+    detection\dataset.py
+        YOLODetectionDataset va detection_collate.
+
+    detection\model.py
+        ConvBNAct, channel_shuffle, EELANLite,
+        EELANBackbone, FPNNeck va EELANDetector.
+
+    detection\train_detection.py
+        build_targets, detection_loss va training loop tham khao.
+
+Kien truc detection:
+
+    E-ELAN Backbone -> FPN Neck -> Single-scale Detection Head
+
+Output head co dang:
+
+    B x (5 + so_class) x S x S
+    = B x 8 x 32 x 32
+
+Trong 8 kenh:
+
+    4 kenh bounding box
+    1 kenh objectness
+    3 kenh class score
+
+Weights detection:
+
+    D:\SPCV\miniproject\detection\outputs\best_detection.pt
+
+Lich su train:
+
+    D:\SPCV\miniproject\detection\outputs\history.json
+
+
+8. KET QUA DETECTION DA GHI NHAN
+----------------------------------------------------------------------
+Overfit test tren 10 anh:
+
+    initial_loss = 1.7981
+    final_loss   = 0.0091
+
+Full training da chay 15 epoch voi:
+
+    optimizer   AdamW
+    learning rate = 3e-4
+    weight decay  = 1e-4
+    image size    = 256
+    batch size    = 16
+
+Validation loss tot nhat:
+
+    Epoch 2
+    train loss = 0.6872
+    valid loss = 0.8600
+
+Do validation loss tang sau epoch 2, checkpoint tot nhat duoc uu tien
+thay vi checkpoint o epoch cuoi. Day la dau hieu overfitting.
+
+Cau hinh danh gia cuoi:
+
+    confidence threshold = 0.75
+    IoU threshold         = 0.50
+    max detections/image  = 20
+
+Ket qua tren test:
+
+    Precision = 4.83%
+    Recall    = 22.58%
+    F1-score  = 7.95%
+    mAP@50    = 11.63%
+
+So luong:
+
+    TP = 142
+    FP = 2800
+    FN = 487
+
+AP@50 theo class:
+
+    cat   = 0.2178
+    dog   = 0.0909
+    panda = 0.0402
+
+Luu y: mAP@50 trong notebook la metric tu cai dat phuc vu minh hoa
+pipeline. No chua phai ket qua COCO mAP day du. Khi bao cao, can ghi ro
+day la detector single-scale toi gian va metric tu cai dat.
+
+
+9. CACH SAVE/LOAD WEIGHTS VA INFERENCE
+----------------------------------------------------------------------
+Classification:
+
+    Weights:
+    classification\outputs\cls_eelan_improved\best.pt
+
+    Mo notebook classification, nap checkpoint va chay cell inference.
+
+Detection:
+
+    Weights:
+    detection\outputs\best_detection.pt
+
+    Mo notebook detection, chay cell load checkpoint, sau do chay cell
+    decode_predictions va show_prediction.
+
+Inference detection thuc hien:
+
+1. Forward anh qua model.
+2. Decode output thanh bounding box xyxy.
+3. Tinh confidence = objectness * class probability.
+4. Loc theo confidence threshold.
+5. Ap dung NMS theo tung class.
+6. Ve box, ten class va confidence len anh.
+
+
+10. CAC HAN CHE CAN GHI TRONG BAO CAO
+----------------------------------------------------------------------
+
+- Detector chi du doan single-scale.
+- Moi grid cell chi luu mot object, object trung cung cell co the bi bo qua.
+- Detection Head va loss la ban toi gian, khong phai YOLOv7 day du.
+- Chua su dung nhieu scale, anchor/anchor-free head day du hoac CIoU loss.
+- Ket qua panda detection thap hon cat va dog.
+- Co hien tuong overfitting: train loss giam nhung validation loss tang.
+- mAP@50 tu cai dat trong notebook khong nen goi la COCO mAP chuan.
+
+Day la cac han che cua kien truc thu nghiem, khong phai loi khi chay
+notebook.
+
+
+11. XU LY LOI THUONG GAP
+----------------------------------------------------------------------
+
+Loi khong tim thay dataset:
+
+- Kiem tra PROJECT_ROOT.
+- Kiem tra DATA_ROOT.
+- Kiem tra co cac thu muc train/images, valid/images, test/images.
+
+Loi khong import duoc detection:
+
+- Mo notebook tu thu muc project goc.
+- Chay lai cell import dau tien.
+- Kiem tra detection\__init__.py ton tai.
+
+Notebook dung hoac chay cham:
+
+- CPU se cham hon GPU.
+- Giam batch size tu 16 xuong 8 hoac 4.
+- Khong chay overfit/full training nhieu lan neu da co checkpoint.
+
+Loi checkpoint khong tuong thich:
+
+- Dung dung class EELANDetector va num_classes=3.
+- Dung checkpoint trong dung thu muc outputs.
+
+
+12. CHECKLIST CHO NGUOI CHAM
+----------------------------------------------------------------------
+
+- Mo notebook classification va detection.
+- Kiem tra data_root/data.yaml.
+- Chay cell kiem tra so luong du lieu.
+- Chay cell forward pass.
+- Kiem tra checkpoint trong classification/outputs va detection/outputs.
+- Chay cell inference.
+- Chay cell metrics.
+- Doi chieu ket qua voi muc 5 va muc 8 cua file nay.
+
+Neu chi can kiem tra ket qua da train san:
+
+    Classification:
+    classification\outputs\cls_eelan_improved\best.pt
+
+    Detection:
+    detection\outputs\best_detection.pt
+
+File nay duoc viet de nguoi cham co the doc cau hinh, xac dinh du lieu,
+mo notebook va tai tao cac buoc thuc nghiem ma khong can phu thuoc vao
+lich su thao tac cua tac gia.
