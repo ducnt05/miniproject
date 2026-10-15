@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['Labarador Retriever', 'german shepherd', 'husky']
+
+roboflow:
+  workspace: kit315-t07zf
+  project: dog-2bvg6
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/kit315-t07zf/dog-2bvg6/dataset/4

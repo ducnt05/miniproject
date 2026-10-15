@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['cat']
+
+roboflow:
+  workspace: project-jxb1s
+  project: cat-illkz
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/project-jxb1s/cat-illkz/dataset/1
